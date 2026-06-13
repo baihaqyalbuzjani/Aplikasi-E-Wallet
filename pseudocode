@@ -2,168 +2,128 @@ ALGORITMA E-MONEY
 
 KAMUS GLOBAL
 
-KONSTANTA
-MAX ← 100
+CONST MAX = 100
 
-TIPE DATA
+TYPE Akun :
+id : string
+pin : integer
+saldo : integer
+status : string
 
-Akun :
-
-* id : string
-* pin : integer
-* saldo : integer
-* status : string
-
-Transaksi :
-
-* idAkun : string
-* jenis : string
-* jumlah : integer
-* keterangan : string
-
-VARIABEL GLOBAL
+TYPE Transaksi :
+idAkun : string
+jenis : string
+jumlah : integer
+keterangan : string
 
 A : array[0..MAX-1] of Akun
-T : array[0..MAX-1] of Transaksi
+T : array[0..MAX-1] of Transaksiiy
+
 n : integer
 nt : integer
 
-=================================================
-FUNCTION KonversiUang
-=====================
-
-FUNCTION KonversiUang(s : string) → integer
+FUNCTION KonversiUang(s : string) -> integer
 
 KAMUS LOKAL
-i : integer
-hasil : integer
+i, hasil : integer
 
 ALGORITMA
-
-hasil ← 0
-
-UNTUK i ← 1 sampai panjang(s) DO
+hasil <- 0
 
 ```
-JIKA s[i] ≠ '.'
-
-    hasil ← hasil * 10 + nilaiDigit(s[i])
-
-AKHIRJIKA
-```
-
+UNTUK i <- 0 sampai panjang(s)-1
+    JIKA s[i] <> '.'
+        hasil <- hasil * 10 + digit(s[i])
+    AKHIRJIKA
 AKHIRUNTUK
 
 RETURN hasil
+```
 
-=================================================
-FUNCTION CariAkun
-=================
-
-FUNCTION CariAkun(A,n,id) → integer
+FUNCTION CariAkun(A,n,id) -> integer
 
 KAMUS LOKAL
 i : integer
 
 ALGORITMA
-
-UNTUK i ← 0 sampai n-1 DO
-
-```
+UNTUK i <- 0 sampai n-1
 JIKA A[i].id = id
-
-    RETURN i
-
+RETURN i
 AKHIRJIKA
-```
-
 AKHIRUNTUK
 
+```
 RETURN -1
+```
 
-=================================================
-PROCEDURE Registrasi
-====================
-
-PROCEDURE Registrasi(IN/OUT A, IN/OUT n)
+PROCEDURE Registrasi(A,n)
 
 KAMUS LOKAL
 id : string
 pin : integer
 
 ALGORITMA
-
 INPUT id
 INPUT pin
 
-JIKA CariAkun(A,n,id) ≠ -1
-
 ```
-OUTPUT "ID sudah digunakan"
-```
-
+JIKA CariAkun(A,n,id) <> -1
+    OUTPUT "ID sudah digunakan"
 LAIN
+    A[n].id <- id
+    A[n].pin <- pin
+    A[n].saldo <- 0
+    A[n].status <- "pending"
 
-```
-A[n].id ← id
-A[n].pin ← pin
-A[n].saldo ← 0
-A[n].status ← "pending"
+    n <- n + 1
 
-n ← n + 1
-
-OUTPUT "Registrasi berhasil"
-OUTPUT "Menunggu persetujuan admin"
-```
-
+    OUTPUT "Registrasi berhasil"
 AKHIRJIKA
+```
 
-=================================================
-PROCEDURE Admin
-===============
-
-PROCEDURE Admin(IN/OUT A,n)
+PROCEDURE Admin(A,n)
 
 KAMUS LOKAL
-i : integer
-pilih : integer
+i, pilih : integer
 
 ALGORITMA
-
-UNTUK i ← 0 sampai n-1 DO
+UNTUK i <- 0 sampai n-1
 
 ```
-JIKA A[i].status = "pending"
+    JIKA A[i].status = "pending"
 
-    OUTPUT "ID : ", A[i].id
+        OUTPUT A[i].id
+        INPUT pilih
 
-    OUTPUT "1. Setujui"
-    OUTPUT "2. Tolak"
-
-    INPUT pilih
-
-    JIKA pilih = 1
-
-        A[i].status ← "aktif"
-        OUTPUT "Akun diaktifkan"
-
-    LAIN
-
-        A[i].status ← "ditolak"
-        OUTPUT "Akun ditolak"
+        JIKA pilih = 1
+            A[i].status <- "aktif"
+        LAIN
+            A[i].status <- "ditolak"
+        AKHIRJIKA
 
     AKHIRJIKA
 
-AKHIRJIKA
+AKHIRUNTUK
 ```
 
+PROCEDURE CetakAkun(A,n)
+
+KAMUS LOKAL
+i : integer
+
+ALGORITMA
+UNTUK i <- 0 sampai n-1
+
+```
+    OUTPUT
+        A[i].id,
+        A[i].status,
+        A[i].saldo
+
 AKHIRUNTUK
+```
 
-=================================================
-FUNCTION Login
-==============
-
-FUNCTION Login(A,n) → integer
+FUNCTION Login(A,n) -> integer
 
 KAMUS LOKAL
 id : string
@@ -171,85 +131,48 @@ pin : integer
 idx : integer
 
 ALGORITMA
-
 INPUT id
 INPUT pin
 
-idx ← CariAkun(A,n,id)
+```
+idx <- CariAkun(A,n,id)
 
 JIKA idx = -1
-
-```
-OUTPUT "ID tidak ditemukan"
-RETURN -1
-```
-
+    RETURN -1
 AKHIRJIKA
 
-JIKA A[idx].status ≠ "aktif"
-
-```
-OUTPUT "Akun belum aktif"
-RETURN -1
-```
-
+JIKA A[idx].status <> "aktif"
+    RETURN -1
 AKHIRJIKA
 
-JIKA A[idx].pin ≠ pin
-
-```
-OUTPUT "PIN salah"
-RETURN -1
-```
-
+JIKA A[idx].pin <> pin
+    RETURN -1
 AKHIRJIKA
-
-OUTPUT "Login berhasil"
 
 RETURN idx
+```
 
-=================================================
-PROCEDURE TopUp
-===============
-
-PROCEDURE TopUp(idx, A, T, nt)
+PROCEDURE TopUp(idx,A,T,nt)
 
 KAMUS LOKAL
 input : string
 jumlah : integer
 
 ALGORITMA
-
 INPUT input
 
-jumlah ← KonversiUang(input)
-
-JIKA jumlah > 0
-
 ```
-A[idx].saldo ← A[idx].saldo + jumlah
+jumlah <- KonversiUang(input)
 
-T[nt].idAkun ← A[idx].id
-T[nt].jenis ← "TopUp"
-T[nt].jumlah ← jumlah
-T[nt].keterangan ← "-"
+A[idx].saldo <- A[idx].saldo + jumlah
 
-nt ← nt + 1
+T[nt].idAkun <- A[idx].id
+T[nt].jenis <- "TopUp"
+T[nt].jumlah <- jumlah
+T[nt].keterangan <- "-"
 
-OUTPUT "Top Up berhasil"
+nt <- nt + 1
 ```
-
-LAIN
-
-```
-OUTPUT "Jumlah tidak valid"
-```
-
-AKHIRJIKA
-
-=================================================
-PROCEDURE Transfer
-==================
 
 PROCEDURE Transfer(idx,A,n,T,nt)
 
@@ -260,137 +183,144 @@ jumlah : integer
 idxTujuan : integer
 
 ALGORITMA
-
 INPUT idTujuan
 
-idxTujuan ← CariAkun(A,n,idTujuan)
+```
+idxTujuan <- CariAkun(A,n,idTujuan)
 
 JIKA idxTujuan = -1
-
-```
-OUTPUT "Akun tujuan tidak ditemukan"
-```
-
+    OUTPUT "Akun tidak ditemukan"
 LAIN
 
+    INPUT input
+    jumlah <- KonversiUang(input)
+
+    JIKA A[idx].saldo >= jumlah
+
+        A[idx].saldo <- A[idx].saldo - jumlah
+        A[idxTujuan].saldo <- A[idxTujuan].saldo + jumlah
+
+        T[nt].idAkun <- A[idx].id
+        T[nt].jenis <- "Transfer"
+        T[nt].jumlah <- jumlah
+        T[nt].keterangan <- "Keluar"
+
+        nt <- nt + 1
+
+    LAIN
+
+        OUTPUT "Saldo tidak cukup"
+
+    AKHIRJIKA
+
+AKHIRJIKA
 ```
+
+PROCEDURE Pembayaran(idx,A,T,nt)
+
+KAMUS LOKAL
+pilih : integer
+input : string
+jumlah : integer
+layanan : string
+
+ALGORITMA
+INPUT pilih
+
+```
+TENTUKAN layanan
+
 INPUT input
 
-jumlah ← KonversiUang(input)
+jumlah <- KonversiUang(input)
 
-JIKA idxTujuan = idx
+JIKA saldo cukup
 
-    OUTPUT "Tidak bisa transfer ke diri sendiri"
+    A[idx].saldo <- A[idx].saldo - jumlah
 
-LAINJIKA jumlah <= 0
+    T[nt].idAkun <- A[idx].id
+    T[nt].jenis <- "Pembayaran"
+    T[nt].jumlah <- jumlah
+    T[nt].keterangan <- layanan
 
-    OUTPUT "Jumlah tidak valid"
+    nt <- nt + 1
 
-LAINJIKA A[idx].saldo < jumlah
+LAIN
 
     OUTPUT "Saldo tidak cukup"
 
-LAIN
-
-    A[idx].saldo ← A[idx].saldo - jumlah
-    A[idxTujuan].saldo ← A[idxTujuan].saldo + jumlah
-
-    T[nt].idAkun ← A[idx].id
-    T[nt].jenis ← "Transfer"
-    T[nt].jumlah ← jumlah
-    T[nt].keterangan ← "Keluar"
-
-    nt ← nt + 1
-
-    OUTPUT "Transfer berhasil"
-
 AKHIRJIKA
 ```
 
-AKHIRJIKA
+PROCEDURE SelectionSort(T,nt)
 
-=================================================
-PROCEDURE Riwayat
-=================
+KAMUS LOKAL
+i,j,max : integer
+temp : Transaksi
+
+ALGORITMA
+
+```
+UNTUK i <- 0 sampai nt-2
+
+    max <- i
+
+    UNTUK j <- i+1 sampai nt-1
+
+        JIKA T[j].jumlah > T[max].jumlah
+            max <- j
+        AKHIRJIKA
+
+    AKHIRUNTUK
+
+    TUKAR T[i] dengan T[max]
+
+AKHIRUNTUK
+```
 
 PROCEDURE Riwayat(idx,A,T,nt)
 
 KAMUS LOKAL
-i : integer
+pilih,i : integer
 
 ALGORITMA
-
-OUTPUT "===== RIWAYAT ====="
-
-UNTUK i ← 0 sampai nt-1 DO
+INPUT pilih
 
 ```
-JIKA T[i].idAkun = A[idx].id
-
-    OUTPUT T[i].jenis
-    OUTPUT T[i].jumlah
-    OUTPUT T[i].keterangan
-
+JIKA pilih = 2
+    SelectionSort(T,nt)
 AKHIRJIKA
-```
+
+UNTUK i <- 0 sampai nt-1
+
+    JIKA T[i].idAkun = A[idx].id
+        OUTPUT
+            T[i].jenis,
+            T[i].jumlah,
+            T[i].keterangan
+    AKHIRJIKA
 
 AKHIRUNTUK
 
-OUTPUT "Saldo : ", A[idx].saldo
+OUTPUT saldo pengguna
 
-=================================================
-PROCEDURE MenuUser
-==================
-
-PROCEDURE MenuUser(idx,A,n,T,nt)
-
-KAMUS LOKAL
-pilih : integer
-
-ALGORITMA
-
-ULANGI
-
-```
-OUTPUT "1. Transfer"
-OUTPUT "2. Top Up"
-OUTPUT "3. Riwayat"
-OUTPUT "4. Logout"
-
-INPUT pilih
-
-JIKA pilih = 1
-
-    Transfer(idx,A,n,T,nt)
-
-LAINJIKA pilih = 2
-
-    TopUp(idx,A,T,nt)
-
-LAINJIKA pilih = 3
-
-    Riwayat(idx,A,T,nt)
-
-AKHIRJIKA
-```
-
-SAMPAI pilih = 4
-
-=================================================
 PROGRAM UTAMA
-=============
-
-ALGORITMA UTAMA
 
 KAMUS LOKAL
+
+A : array[0..MAX-1] of Akun
+T : array[0..MAX-1] of Transaksi
+
+n : integer
+nt : integer
 
 pilih : integer
 idx : integer
 
 ALGORITMA
 
-n ← 0
-nt ← 0
+n <- 0
+nt <- 0
 
 ULANGI
 
@@ -409,20 +339,67 @@ JIKA pilih = 1
 
 LAINJIKA pilih = 2
 
-    idx ← Login(A,n)
+    idx <- Login(A,n)
 
-    JIKA idx ≠ -1
+    JIKA idx <> -1
 
-        MenuUser(idx,A,n,T,nt)
+        ULANGI
+
+            OUTPUT "===== MENU USER ====="
+            OUTPUT "1. Transfer"
+            OUTPUT "2. Top Up"
+            OUTPUT "3. Pembayaran"
+            OUTPUT "4. Riwayat"
+            OUTPUT "5. Logout"
+
+            INPUT pilih
+
+            JIKA pilih = 1
+
+                Transfer(idx,A,n,T,nt)
+
+            LAINJIKA pilih = 2
+
+                TopUp(idx,A,T,nt)
+
+            LAINJIKA pilih = 3
+
+                Pembayaran(idx,A,T,nt)
+
+            LAINJIKA pilih = 4
+
+                Riwayat(idx,A,T,nt)
+
+            AKHIRJIKA
+
+        SAMPAI pilih = 5
 
     AKHIRJIKA
 
 LAINJIKA pilih = 3
 
-    Admin(A,n)
+    ULANGI
+
+        OUTPUT "===== MENU ADMIN ====="
+        OUTPUT "1. Approve / Tolak Akun"
+        OUTPUT "2. Cetak Daftar Akun"
+        OUTPUT "3. Kembali"
+
+        INPUT pilih
+
+        JIKA pilih = 1
+
+            Admin(A,n)
+
+        LAINJIKA pilih = 2
+
+            CetakAkun(A,n)
+
+        AKHIRJIKA
+
+    SAMPAI pilih = 3
 
 AKHIRJIKA
-```
 
 SAMPAI pilih = 4
 
