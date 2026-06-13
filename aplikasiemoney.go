@@ -65,6 +65,38 @@ func registrasi(A *[MAX]Akun, n *int) {
 	fmt.Println("Menunggu persetujuan admin")
 }
 
+func menuAdmin(A *[MAX]Akun, n int) {
+	var pilih int
+
+	for {
+
+		fmt.Println("\n===== MENU ADMIN =====")
+		fmt.Println("1. Approve / Tolak Akun")
+		fmt.Println("2. Cetak Daftar Akun")
+		fmt.Println("3. Kembali")
+		fmt.Print("Pilih : ")
+		fmt.Scan(&pilih)
+
+		if pilih == 1 {
+
+			admin(A, n)
+
+		} else if pilih == 2 {
+
+			cetakAkun(A, n)
+
+		} else if pilih == 3 {
+
+			return
+
+		} else {
+
+			fmt.Println("Pilihan tidak valid")
+
+		}
+	}
+}
+
 func admin(A *[MAX]Akun, n int) {
 	var pilih int
 
@@ -195,11 +227,99 @@ func transfer(idx int, A *[MAX]Akun, n int, T *[MAX]Transaksi, nt *int) {
 	fmt.Println("Transfer berhasil")
 }
 
+func pembayaran(idx int, A *[MAX]Akun, T *[MAX]Transaksi, nt *int) {
+	var pilih int
+	var input string
+	var jumlah int
+	var layanan string
+
+	fmt.Println("\n===== PEMBAYARAN =====")
+	fmt.Println("1. Makanan")
+	fmt.Println("2. Pulsa")
+	fmt.Println("3. Listrik")
+	fmt.Println("4. BPJS")
+	fmt.Print("Pilih : ")
+	fmt.Scan(&pilih)
+
+	if pilih == 1 {
+		layanan = "Makanan"
+	} else if pilih == 2 {
+		layanan = "Pulsa"
+	} else if pilih == 3 {
+		layanan = "Listrik"
+	} else if pilih == 4 {
+		layanan = "BPJS"
+	} else {
+		fmt.Println("Pilihan tidak valid")
+		return
+	}
+
+	fmt.Print("Nominal : ")
+	fmt.Scan(&input)
+
+	jumlah = konversiUang(input)
+
+	if jumlah <= 0 {
+		fmt.Println("Nominal tidak valid")
+		return
+	}
+
+	if A[idx].saldo < jumlah {
+		fmt.Println("Saldo tidak cukup")
+		return
+	}
+
+	A[idx].saldo -= jumlah
+
+	T[*nt].idAkun = A[idx].id
+	T[*nt].jenis = "Pembayaran " + layanan
+	T[*nt].jumlah = jumlah
+	T[*nt].keterangan = "Keluar"
+
+	*nt = *nt + 1
+
+	fmt.Println("Pembayaran berhasil")
+}
+
+func sortTransaksi(T *[MAX]Transaksi, nt int) {
+	var temp Transaksi
+
+	for i := 0; i < nt-1; i++ {
+
+		max := i
+
+		for j := i + 1; j < nt; j++ {
+
+			if T[j].jumlah > T[max].jumlah {
+				max = j
+			}
+		}
+
+		temp = T[i]
+		T[i] = T[max]
+		T[max] = temp
+	}
+}
+
 func riwayat(idx int, A *[MAX]Akun, T *[MAX]Transaksi, nt int) {
+
+	var pilih int
+
+	fmt.Println("1. Normal")
+	fmt.Println("2. Terurut")
+	fmt.Print("Pilih : ")
+	fmt.Scan(&pilih)
+
+	if pilih == 2 {
+		sortTransaksi(T, nt)
+	}
+
 	fmt.Println("\n===== RIWAYAT =====")
 
 	for i := 0; i < nt; i++ {
+
 		if T[i].idAkun == A[idx].id {
+
 			fmt.Println(
 				T[i].jenis,
 				T[i].jumlah,
@@ -211,16 +331,28 @@ func riwayat(idx int, A *[MAX]Akun, T *[MAX]Transaksi, nt int) {
 	fmt.Println("Saldo :", A[idx].saldo)
 }
 
+func cetakAkun(A *[MAX]Akun, n int) {
+	fmt.Println("\n===== DATA AKUN =====")
+
+	for i := 0; i < n; i++ {
+		fmt.Println(
+			"ID :", A[i].id,
+			"| Status :", A[i].status,
+			"| Saldo :", A[i].saldo,
+		)
+	}
+}
+
 func menuUser(idx int, A *[MAX]Akun, n int, T *[MAX]Transaksi, nt *int) {
 	var pilih int
 
 	for {
 
-		fmt.Println("\n===== MENU USER =====")
 		fmt.Println("1. Transfer")
 		fmt.Println("2. Top Up")
-		fmt.Println("3. Riwayat")
-		fmt.Println("4. Logout")
+		fmt.Println("3. Pembayaran")
+		fmt.Println("4. Riwayat")
+		fmt.Println("5. Logout")
 		fmt.Print("Pilih : ")
 		fmt.Scan(&pilih)
 
@@ -234,11 +366,14 @@ func menuUser(idx int, A *[MAX]Akun, n int, T *[MAX]Transaksi, nt *int) {
 
 		} else if pilih == 3 {
 
-			riwayat(idx, A, T, *nt)
+			pembayaran(idx, A, T, nt)
 
 		} else if pilih == 4 {
 
-			fmt.Println("Logout...")
+			riwayat(idx, A, T, *nt)
+			
+		} else if pilih == 5 {
+
 			return
 
 		} else {
@@ -281,7 +416,7 @@ func main() {
 
 		} else if pilih == 3 {
 
-			admin(&A, n)
+			menuAdmin(&A, n)
 
 		} else if pilih == 4 {
 
