@@ -65,38 +65,6 @@ func registrasi(A *[MAX]Akun, n *int) {
 	fmt.Println("Menunggu persetujuan admin")
 }
 
-func menuAdmin(A *[MAX]Akun, n int) {
-	var pilih int
-
-	for {
-
-		fmt.Println("\n===== MENU ADMIN =====")
-		fmt.Println("1. Approve / Tolak Akun")
-		fmt.Println("2. Cetak Daftar Akun")
-		fmt.Println("3. Kembali")
-		fmt.Print("Pilih : ")
-		fmt.Scan(&pilih)
-
-		if pilih == 1 {
-
-			admin(A, n)
-
-		} else if pilih == 2 {
-
-			cetakAkun(A, n)
-
-		} else if pilih == 3 {
-
-			return
-
-		} else {
-
-			fmt.Println("Pilihan tidak valid")
-
-		}
-	}
-}
-
 func admin(A *[MAX]Akun, n int) {
 	var pilih int
 
@@ -331,15 +299,149 @@ func riwayat(idx int, A *[MAX]Akun, T *[MAX]Transaksi, nt int) {
 	fmt.Println("Saldo :", A[idx].saldo)
 }
 
+func insertionSortAkun(A *[MAX]Akun, n int) {
+	var temp Akun
+	var i, j int
+
+	for i = 1; i < n; i++ {
+
+		temp = A[i]
+		j = i - 1
+
+		for j >= 0 && A[j].saldo < temp.saldo {
+
+			A[j+1] = A[j]
+			j--
+
+		}
+
+		A[j+1] = temp
+	}
+}
+
 func cetakAkun(A *[MAX]Akun, n int) {
-	fmt.Println("\n===== DATA AKUN =====")
+
+	insertionSortAkun(A, n)
+
+	fmt.Println("\n===== DAFTAR AKUN =====")
 
 	for i := 0; i < n; i++ {
+
 		fmt.Println(
-			"ID :", A[i].id,
-			"| Status :", A[i].status,
+			"Ranking :", i+1,
+			"| ID :", A[i].id,
 			"| Saldo :", A[i].saldo,
+			"| Status :", A[i].status,
 		)
+	}
+}
+
+func sortID(A *[MAX]Akun, n int) {
+	var temp Akun
+	var i, j int
+
+	for i = 1; i < n; i++ {
+
+		temp = A[i]
+		j = i - 1
+
+		for j >= 0 && A[j].id > temp.id {
+
+			A[j+1] = A[j]
+			j--
+
+		}
+
+		A[j+1] = temp
+	}
+}
+
+func binarySearchAkun(A *[MAX]Akun, n int, cari string) int {
+
+	left := 0
+	right := n - 1
+
+	for left <= right {
+
+		mid := (left + right) / 2
+
+		if A[mid].id == cari {
+
+			return mid
+
+		} else if cari < A[mid].id {
+
+			right = mid - 1
+
+		} else {
+
+			left = mid + 1
+
+		}
+	}
+
+	return -1
+}
+
+func cariAkunBinary(A *[MAX]Akun, n int) {
+
+	var id string
+	var idx int
+
+	sortID(A, n)
+
+	fmt.Print("Masukkan ID : ")
+	fmt.Scan(&id)
+
+	idx = binarySearchAkun(A, n, id)
+
+	if idx != -1 {
+
+		fmt.Println("\n===== DATA AKUN =====")
+		fmt.Println("ID     :", A[idx].id)
+		fmt.Println("Saldo  :", A[idx].saldo)
+		fmt.Println("Status :", A[idx].status)
+
+	} else {
+
+		fmt.Println("Akun tidak ditemukan")
+	}
+}
+
+func menuAdmin(A *[MAX]Akun, n int) {
+
+	var pilih int
+
+	for {
+
+		fmt.Println("\n===== MENU ADMIN =====")
+		fmt.Println("1. Approve / Tolak Akun")
+		fmt.Println("2. Cetak Daftar Akun")
+		fmt.Println("3. Cari Akun")
+		fmt.Println("4. Kembali")
+		fmt.Print("Pilih : ")
+		fmt.Scan(&pilih)
+
+		if pilih == 1 {
+
+			admin(A, n)
+
+		} else if pilih == 2 {
+
+			cetakAkun(A, n)
+
+		} else if pilih == 3 {
+
+			cariAkunBinary(A, n)
+
+		} else if pilih == 4 {
+
+			return
+
+		} else {
+
+			fmt.Println("Pilihan tidak valid")
+		}
 	}
 }
 
